@@ -1,11 +1,16 @@
 //Data Class untuk mengimplementasikan Prototype DP
-class Barang{
+class Barang: Codable{
     private var jenis: String
     private var kategori: String
     private var merk: String
     private var harga: Double
     private var expiredDate: String
-    init(jenis: String,kategori: String,merk: String = "", harga: Double = 0, expiredDate: String = ""){
+    init(jenis: String = "",
+        kategori: String = "",
+        merk: String = "", 
+        harga: Double = 0, 
+        expiredDate: String = ""
+        ){
         self.jenis = jenis
         self.kategori = kategori
     }
@@ -43,16 +48,12 @@ class Kopi: Barang {
 }
 
 //Data Class untuk mengambil data dari DB
-class SusuDB: Codable{
-    var merk: String?
-    var harga: Double?
-    var expiredDate: String?
-}
-
-class KopiDB: Codable{
-    var merk: String?
-    var harga: Double?
-    var expiredDate: String?
+class BarangDB: Codable{
+    let jenis: String?
+    let kategori: String?
+    let merk: String?
+    let harga: Double?
+    let expiredDate: String?
 }
 
 /*
@@ -174,22 +175,35 @@ class ViewController: UIViewController{
     @IBOutlet var merk: UILabel!
     @IBOutlet var harga: UILabel!
     @IBOutlet var expiredDate: UILabel!
+    //variable untuk data
+    private var barangDB: [BarangDB]
+    private var barang: [Barang]
     
-    private var barangDB: [Barang]
-
     // Controller continued
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        loadData()
         let susu: Susu()
         let kopi: Kopi
+
+        //mengambil data json dari internet
+        loadData()
+
+        //memindahkan data dari Data Class DB ke Data Class barang
         for item in barangDB {
-            if barangDB[item].jenis.caseInsensitiveCompare("kopi") == ComparisonResult.orderedSame {
+            let jenisInit = barangDB[item].jenis
+            let kategoriInit = barangDB[item].kategori
+            let hargaInit = barangDB[item].harga
+            let merkInit = barangDB[item].merk
+            let expiredDateInit = barangDB[item].expiredDate
+            barangDB.append(Barang(jenisInit,kategoriInit,merkInit,hargaInit,expiredDateInit))
+        }
+
+        for item in barangDB {
+            if barang[item].jenis.caseInsensitiveCompare("kopi") == ComparisonResult.orderedSame {
                 let kopiView = kopi.clone()
-                kopiView.merk = barangDB[item].merk
-                kopiView.harga = barangDB[item].harga
-                kopiView.expiredDate = barangDB[item].expiredDate
+                kopiView.merk = barang[item].merk
+                kopiView.harga = barang[item].harga
+                kopiView.expiredDate = barang[item].expiredDate
                 
                 //menampilkan di element view
                 merk.text = kopiView.merk
@@ -198,9 +212,9 @@ class ViewController: UIViewController{
             }
             else if barangDB[item].jenis.caseInsensitiveCompare("kopi") == ComparisonResult.orderedSame {
                 let susuView = susu.clone()
-                susuView.merk = barangDB[item].merk
-                susuView.harga = barangDB[item].harga
-                susuView.expiredDate = barangDB[item].expiredDate
+                susuView.merk = barang[item].merk
+                susuView.harga = barang[item].harga
+                susuView.expiredDate = barang[item].expiredDate
 
                 //menampilkan di element view
                 merk.text = susuView.merk
@@ -217,7 +231,7 @@ class ViewController: UIViewController{
 
 //class for network layer
 class NetworkManager{
-    func fetchData(completion: @escaping(_ barang: [Barang]) -> Void){
+    func fetchData(completion: @escaping(_ barang: [BarangDB]) -> Void){
         guard let url= URL(string: "json url link here"){
             return
         }
@@ -229,7 +243,7 @@ class NetworkManager{
             if let jsonString = String(data: data!, encoding: .utf8) {
                 print(jsonString)
             }
-            let barang: [Barang] = try! JSONDecoder().decode([Barang].self, from : data!)
+            let barang: [BarangDB] = try! JSONDecoder().decode([BarangDB].self, from : data!)
                 completion(barang)
         }
         .resume()
