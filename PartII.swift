@@ -178,7 +178,7 @@ class ViewController: UIViewController{
     //variable untuk data
     private var barangDB: [BarangDB]
     private var barang: [Barang]
-    
+
     // Controller continued
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -210,7 +210,7 @@ class ViewController: UIViewController{
                 harga.text = kopiView.harga
                 expiredDate.text = kopiView.expiredDate
             }
-            else if barangDB[item].jenis.caseInsensitiveCompare("kopi") == ComparisonResult.orderedSame {
+            else if barangDB[item].jenis.caseInsensitiveCompare("susu") == ComparisonResult.orderedSame {
                 let susuView = susu.clone()
                 susuView.merk = barang[item].merk
                 susuView.harga = barang[item].harga
