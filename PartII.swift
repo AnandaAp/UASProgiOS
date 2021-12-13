@@ -2,7 +2,10 @@
 class Barang{
     private var jenis: String
     private var kategori: String
-    init(jenis: String,kategori: String){
+    private var merk: String
+    private var harga: Double
+    private var expiredDate: String
+    init(jenis: String,kategori: String,merk: String = "", harga: Double = 0, expiredDate: String = ""){
         self.jenis = jenis
         self.kategori = kategori
     }
@@ -15,7 +18,7 @@ class Susu: Barang {
     private var merk: String
     private var harga: Double
     private var expiredDate: String
-    init(merk: String, harga: Double, expiredDate: String){
+    init(merk: String = "", harga: Double = 0, expiredDate: String = ""){
         self.merk = merk
         self.harga = harga
         self.expiredDate = expiredDate
@@ -29,7 +32,7 @@ class Kopi: Barang {
     private var merk: String
     private var harga: Double
     private var expiredDate: String
-    init(merk: String, harga: Double, expiredDate: String){
+    init(merk: String = "", harga: Double = 0, expiredDate: String = ""){
         self.merk = merk
         self.harga = harga
         self.expiredDate = expiredDate
@@ -52,6 +55,7 @@ class KopiDB: Codable{
     var expiredDate: String?
 }
 
+/*
 //class for DB layer
 class DBHelper{
     var db : OpaquePointer?
@@ -161,4 +165,73 @@ class DBHelper{
                 }
             }
         }
+}
+*/
+
+//Controller Layer
+class ViewController: UIViewController{
+    // View from the storyboard - both labels
+    @IBOutlet var merk: UILabel!
+    @IBOutlet var harga: UILabel!
+    @IBOutlet var expiredDate: UILabel!
+    
+    private var barangDB: [Barang]
+
+    // Controller continued
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        loadData()
+        let susu: Susu()
+        let kopi: Kopi
+        for item in barangDB {
+            if barangDB[item].jenis.caseInsensitiveCompare("kopi") == ComparisonResult.orderedSame {
+                let kopiView = kopi.clone()
+                kopiView.merk = barangDB[item].merk
+                kopiView.harga = barangDB[item].harga
+                kopiView.expiredDate = barangDB[item].expiredDate
+                
+                //menampilkan di element view
+                merk.text = kopiView.merk
+                harga.text = kopiView.harga
+                expiredDate.text = kopiView.expiredDate
+            }
+            else if barangDB[item].jenis.caseInsensitiveCompare("kopi") == ComparisonResult.orderedSame {
+                let susuView = susu.clone()
+                susuView.merk = barangDB[item].merk
+                susuView.harga = barangDB[item].harga
+                susuView.expiredDate = barangDB[item].expiredDate
+
+                //menampilkan di element view
+                merk.text = susuView.merk
+                harga.text = susuView.harga
+                expiredDate.text = susuView.expiredDate
+            }
+        }
+    }
+
+    func loadData(){
+        NetworkManager.fetchData(barang)
+    }
+}
+
+//class for network layer
+class NetworkManager{
+    func fetchData(completion: @escaping(_ barang: [Barang]) -> Void){
+        guard let url= URL(string: "json url link here"){
+            return
+        }
+
+        URLSession.shared.dataTask(with: url){ data, response, error in
+            println("Data",data)
+            println("Response",response)
+            // let jsonData = data.data(using: .utf8)!
+            if let jsonString = String(data: data!, encoding: .utf8) {
+                print(jsonString)
+            }
+            let barang: [Barang] = try! JSONDecoder().decode([Barang].self, from : data!)
+                completion(barang)
+        }
+        .resume()
+    }
 }
